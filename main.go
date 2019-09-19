@@ -2,26 +2,29 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
-	"html/template"
+	"gallery/views"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 var (
-	homeTemplate    *template.Template
-	contactTemplate *template.Template
+	homeView    *views.View
+	contactView *views.View
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	if err := homeTemplate.Execute(w, nil); err != nil {
+	err := homeView.Template.Execute(w, nil)
+	if err != nil {
 		panic(err)
 	}
 }
 
 func contact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	if err := contactTemplate.Execute(w, nil); err != nil {
+	err := contactView.Template.Execute(w, nil)
+	if err != nil {
 		panic(err)
 	}
 }
@@ -33,18 +36,9 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var err error
-	homeTemplate, err = template.ParseFiles(
-		"views/home.gohtml",
-		"views/layouts/footer.gohtml",
-	)
-	if err != nil {
-		panic(err)
-	}
-	contactTemplate, err = template.ParseFiles("views/contact.gohtml")
-	if err != nil {
-		panic(err)
-	}
+	homeView = views.NewView("views/home.gohtml")
+	contactView = views.NewView("views/contact.gohtml")
+
 	r := mux.NewRouter()
 	r.NotFoundHandler = http.HandlerFunc(notFound)
 	r.HandleFunc("/", home)
