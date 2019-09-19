@@ -15,12 +15,12 @@ var (
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	must(contactView.Render(w, nil))
+	must(homeView.Render(w, nil))
 }
 
 func contact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	must(homeView.Render(w, nil))
+	must(contactView.Render(w, nil))
 }
 
 func notFound(w http.ResponseWriter, r *http.Request) {
