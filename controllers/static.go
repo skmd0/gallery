@@ -4,6 +4,7 @@ import (
 	"gallery/views"
 )
 
+// NewStatic returns a struct will static view objects
 func NewStatic() *Static {
 	return &Static{
 		Home:    views.NewView("bootstrap", "static/home"),
@@ -11,6 +12,7 @@ func NewStatic() *Static {
 	}
 }
 
+// Static contains simple static view objects
 type Static struct {
 	Home    *views.View
 	Contact *views.View

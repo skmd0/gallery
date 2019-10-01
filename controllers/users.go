@@ -26,6 +26,7 @@ type Users struct {
 	us        *models.UserService
 }
 
+// SignupForm contains fields for mapping signup form data
 type SignupForm struct {
 	Name     string `schema:"name"`
 	Email    string `schema:"email"`
@@ -53,6 +54,7 @@ func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, user)
 }
 
+// LoginForm contains fields for mapping login form data
 type LoginForm struct {
 	Email    string `shema:"email"`
 	Password string `shema:"password"`
