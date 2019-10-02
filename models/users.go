@@ -15,10 +15,15 @@ var (
 
 	// ErrInvalidID is returned when an invalid ID is provided
 	ErrInvalidID = errors.New("models: ID provided was invalid")
+
+	// ErrInvalidPassword is returned when an invalid password
+	// is used when attenpting to authenticate a user.
+	ErrInvalidPassword = errors.New("models: incorrect password provided")
 )
 
 const userPwPepper = "secret-random-string"
 
+// NewUserService creates a UserService struct out of DB login string
 func NewUserService(connectionInfo string) (*UserService, error) {
 	db, err := gorm.Open("postgres", connectionInfo)
 	if err != nil {
@@ -27,6 +32,7 @@ func NewUserService(connectionInfo string) (*UserService, error) {
 	return &UserService{db: db}, nil
 }
 
+// UserService wrapps over DB object
 type UserService struct {
 	db *gorm.DB
 }
@@ -48,6 +54,27 @@ func (us *UserService) ByEmail(email string) (*User, error) {
 	db := us.db.Where("email = ?", email)
 	err := first(db, &user)
 	return &user, err
+}
+
+// Authenicate can be used to authenicate a user with provided email
+// address and password.
+func (us *UserService) Authenicate(email, password string) (*User, error) {
+	foundUser, err := us.ByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(foundUser.PasswordHash), []byte(password+userPwPepper))
+	if err != nil {
+		switch err {
+		case bcrypt.ErrMismatchedHashAndPassword:
+			return nil, ErrInvalidPassword
+		default:
+			return nil, err
+		}
+	}
+
+	return foundUser, nil
 }
 
 // first will query the provided gorm.DB and will get the first
