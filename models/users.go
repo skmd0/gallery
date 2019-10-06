@@ -2,6 +2,8 @@ package models
 
 import (
 	"errors"
+	"gallery/hash"
+	"gallery/rand"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -22,6 +24,7 @@ var (
 )
 
 const userPwPepper = "secret-random-string"
+const hmacSecretKey = "secret-hmac-key"
 
 // NewUserService creates a UserService struct out of DB login string
 func NewUserService(connectionInfo string) (*UserService, error) {
@@ -29,12 +32,18 @@ func NewUserService(connectionInfo string) (*UserService, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &UserService{db: db}, nil
+	db.LogMode(true)
+	hmac := hash.NewHMAC(hmacSecretKey)
+	return &UserService{
+		db:   db,
+		hmac: hmac,
+	}, nil
 }
 
 // UserService wrapps over DB object
 type UserService struct {
-	db *gorm.DB
+	db   *gorm.DB
+	hmac hash.HMAC
 }
 
 // ByID will look up user by id and return the object
@@ -54,6 +63,17 @@ func (us *UserService) ByEmail(email string) (*User, error) {
 	db := us.db.Where("email = ?", email)
 	err := first(db, &user)
 	return &user, err
+}
+
+// ByRemember returns the user by given Remember token
+func (us *UserService) ByRemember(token string) (*User, error) {
+	var user User
+	rememberHash := us.hmac.Hash(token)
+	err := first(us.db.Where("remember_hash = ?", rememberHash), &user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 // Authenicate can be used to authenicate a user with provided email
@@ -96,11 +116,23 @@ func (us *UserService) Create(user *User) error {
 	}
 	user.PasswordHash = string(hashedBytes)
 	user.Password = ""
+
+	if user.Remember == "" {
+		token, err := rand.RememberToken()
+		if err != nil {
+			return err
+		}
+		user.Remember = token
+	}
+	user.RememberHash = us.hmac.Hash(user.Remember)
 	return us.db.Create(user).Error
 }
 
 // Update will update the provided user
 func (us *UserService) Update(user *User) error {
+	if user.Remember != "" {
+		user.RememberHash = us.hmac.Hash(user.Remember)
+	}
 	return us.db.Save(user).Error
 }
 
@@ -141,4 +173,6 @@ type User struct {
 	Email        string `gorm:"not null,unique_index"`
 	Password     string `gorm:"-"`
 	PasswordHash string `gorm:"not null"`
+	Remember     string `gorm:"-"`
+	RememberHash string `gorm:"not null;unique_index"`
 }
