@@ -74,7 +74,7 @@ func (u *Users) Login(w http.ResponseWriter, r *http.Request) {
 	if err := parseForm(r, &form); err != nil {
 		panic(err)
 	}
-	user, err := u.us.Authenicate(form.Email, form.Password)
+	user, err := u.us.Authenticate(form.Email, form.Password)
 	if err != nil {
 		switch err {
 		case models.ErrNotFound:
