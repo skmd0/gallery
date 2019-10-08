@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"gallery/hash"
 	"gallery/rand"
 	"regexp"
@@ -11,40 +10,6 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"golang.org/x/crypto/bcrypt"
-)
-
-var (
-	// ErrNotFound is returned when a resource cannot be found in the database
-	ErrNotFound = errors.New("models: resource not found")
-
-	// ErrIDInvalid is returned when an invalid ID is provided
-	ErrIDInvalid = errors.New("models: ID provided was invalid")
-
-	// ErrPasswordIncorrect is returned when an invalid password
-	// is used when attenpting to authenticate a user.
-	ErrPasswordIncorrect = errors.New("models: incorrect password provided")
-
-	// ErrEmailRequired is returned when en email address is not provided when creating a user
-	ErrEmailRequired = errors.New("models: email address is required")
-
-	// ErrEmailInvalid is returned when an email address is not provided
-	ErrEmailInvalid = errors.New("models: email address is invalid")
-
-	// ErrEmailAlreadyTaken is returned when email is already registered in DB
-	ErrEmailAlreadyTaken = errors.New("models: email address is already taken")
-
-	// ErrPasswordTooShort is returned when password is too short
-	ErrPasswordTooShort = errors.New("models: password must be at least 8 characters long")
-
-	// ErrPasswordRequired is returned when password is not set
-	ErrPasswordRequired = errors.New("models: password is required")
-
-	// ErrRememberTooShort is returned when the remember token is less than 32 bytes
-	ErrRememberTooShort = errors.New("models: remeber token mus be at least 32 bytes")
-
-	// ErrRememberRequired is returned when create or update is attempted
-	// without a user remeber token hash
-	ErrRememberRequired = errors.New("models: remember token hash is required")
 )
 
 const userPwPepper = "secret-random-string"
