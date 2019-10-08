@@ -27,6 +27,22 @@ type Users struct {
 	us        models.UserService
 }
 
+// New URL endpoint GET /signup
+func (u *Users) New(w http.ResponseWriter, r *http.Request) {
+	type Alert struct {
+		Level   string
+		Message string
+	}
+	a := Alert{
+		Level:   "success",
+		Message: "Successfully rendered a dynamic alert!",
+	}
+	err := u.NewView.Render(w, a)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // SignupForm contains fields for mapping signup form data
 type SignupForm struct {
 	Name     string `schema:"name"`
