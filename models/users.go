@@ -52,14 +52,11 @@ type UserService interface {
 }
 
 // NewUserService creates a UserService struct out of DB login string
-func NewUserService(connectionInfo string) (UserService, error) {
-	ug, err := newUserGorm(connectionInfo)
-	if err != nil {
-		return nil, err
-	}
+func NewUserService(db *gorm.DB) UserService {
+	ug := &userGorm{db}
 	hmac := hash.NewHMAC(hmacSecretKey)
 	uv := newUserValidator(ug, hmac)
-	return &userService{uv}, nil
+	return &userService{uv}
 }
 
 var _ UserService = &userService{}
@@ -299,24 +296,10 @@ func (uv *userValidator) passwordHashRequired(user *User) error {
 	return nil
 }
 
-func newUserGorm(connectionInfo string) (*userGorm, error) {
-	db, err := gorm.Open("postgres", connectionInfo)
-	if err != nil {
-		return nil, err
-	}
-	db.LogMode(true)
-	hmac := hash.NewHMAC(hmacSecretKey)
-	return &userGorm{
-		db:   db,
-		hmac: hmac,
-	}, nil
-}
-
 var _ UserDB = &userGorm{}
 
 type userGorm struct {
-	db   *gorm.DB
-	hmac hash.HMAC
+	db *gorm.DB
 }
 
 // ByID will look up user by id and return the object
