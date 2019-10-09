@@ -30,10 +30,7 @@ type Users struct {
 
 // New URL endpoint GET /signup
 func (u *Users) New(w http.ResponseWriter, r *http.Request) {
-	err := u.NewView.Render(w, nil)
-	if err != nil {
-		panic(err)
-	}
+	u.NewView.Render(w, nil)
 }
 
 // SignupForm contains fields for mapping signup form data
