@@ -1,0 +1,12 @@
+
+.image-thumbnail {
+  width:100%;margin-bottom:8px;border:1px solid #222;
+}
+
+.image-delete {
+  margin-bottom:16px
+}
+
+footer{
+  padding-top:60px;
+}
