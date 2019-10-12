@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type ImageService interface {
@@ -40,11 +41,18 @@ func (is *imageService) Create(galleryID uint, r io.ReadCloser, filename string)
 
 func (is *imageService) ByGalleryID(galleryID uint) ([]string, error) {
 	path := is.imagePath(galleryID)
-	strings, err := filepath.Glob(path + "*")
+	files, err := filepath.Glob(path + "*")
 	if err != nil {
 		return nil, err
 	}
-	return strings, nil
+	for i := range files {
+		f := files[i]
+		if strings.Contains(f, "\\") {
+			files[i] = strings.ReplaceAll(f, "\\", "/")
+		}
+		files[i] = "/" + files[i]
+	}
+	return files, nil
 }
 
 func (is *imageService) imagePath(galleryID uint) string {
