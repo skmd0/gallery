@@ -1,6 +1,9 @@
 package views
 
-import "gallery/models"
+import (
+	"gallery/models"
+	"log"
+)
 
 const (
 	AlertLvlError   = "danger"
@@ -33,6 +36,7 @@ func (d *Data) SetAlert(err error) {
 			Message: pErr.Public(),
 		}
 	} else {
+		log.Println(err)
 		d.Alert = &Alert{
 			Level:   AlertLvlError,
 			Message: AlertMsgGeneric,
