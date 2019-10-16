@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"gallery/controllers"
+	"gallery/email"
 	"gallery/middleware"
 	"gallery/models"
 	"gallery/rand"
@@ -32,10 +33,16 @@ func main() {
 	// services.DestructiveReset()
 	services.AutoMigrate()
 
+	mgCfg := cfg.Mailgun
+	emailer := email.NewClient(
+		email.WithSender("Gallery Support", "support@sandboxec2fb47449664ed8a7973a371f3e0e78.mailgun.org"),
+		email.WithMailgun(mgCfg.Domain, mgCfg.APIKey, mgCfg.PublicAPIKey),
+	)
+
 	r := mux.NewRouter()
 
 	staticC := controllers.NewStatic()
-	usersC := controllers.NewUsers(services.User)
+	usersC := controllers.NewUsers(services.User, emailer)
 	galleriesC := controllers.NewGalleries(services.Gallery, services.Image, r)
 
 	b, err := rand.Bytes(32)
