@@ -79,5 +79,5 @@ func (s *Services) DestructiveReset() error {
 
 // AutoMigrate tries to automigrate db
 func (s *Services) AutoMigrate() error {
-	return s.db.AutoMigrate(&User{}, &Gallery{}).Error
+	return s.db.AutoMigrate(&User{}, &Gallery{}, &pwReset{}).Error
 }

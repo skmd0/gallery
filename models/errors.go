@@ -28,6 +28,9 @@ const (
 	// ErrTitleRequired when gallery title is not provided
 	ErrTitleRequired modelError = "models: title is required"
 
+	// ErrTokenInvalid when password reset token is not valid
+	ErrTokenInvalid modelError = "models: token provided is not valid"
+
 	// ErrIDInvalid is returned when an invalid ID is provided
 	ErrIDInvalid privateError = "models: ID provided was invalid"
 
