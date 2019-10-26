@@ -43,6 +43,9 @@ const (
 
 	// ErrUserIDRequired requires id
 	ErrUserIDRequired privateError = "models: user ID is required"
+
+	// ErrServiceRequired requires OAuth service type
+	ErrServiceRequired privateError = "models: OAuth service type is required"
 )
 
 type modelError string

@@ -10,6 +10,8 @@ import (
 	"gallery/rand"
 	"net/http"
 
+	"golang.org/x/oauth2"
+
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 )
@@ -25,6 +27,7 @@ func main() {
 		models.WithUser(cfg.Pepper, cfg.HMACKey),
 		models.WithGallery(),
 		models.WithImage(),
+		models.WithOAuth(),
 	)
 	if err != nil {
 		panic(err)
@@ -44,6 +47,18 @@ func main() {
 	staticC := controllers.NewStatic()
 	usersC := controllers.NewUsers(services.User, emailer)
 	galleriesC := controllers.NewGalleries(services.Gallery, services.Image, r)
+
+	configs := make(map[string]*oauth2.Config)
+	configs[models.OAuthDropbox] = &oauth2.Config{
+		ClientID:     cfg.Dropbox.ID,
+		ClientSecret: cfg.Dropbox.Secret,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  cfg.Dropbox.AuthURL,
+			TokenURL: cfg.Dropbox.TokenURL,
+		},
+		RedirectURL: "http://localhost:3000/oauth/dropbox/callback",
+	}
+	oauthsC := controllers.NewOAuths(services.OAuth, configs)
 
 	b, err := rand.Bytes(32)
 	if err != nil {
@@ -71,6 +86,11 @@ func main() {
 	r.HandleFunc("/forgot", usersC.InitiateReset).Methods("POST")
 	r.HandleFunc("/reset", usersC.ResetPw).Methods("GET")
 	r.HandleFunc("/reset", usersC.CompleteReset).Methods("POST")
+
+	// OAuth Routes
+	r.HandleFunc("/oauth/{service:[a-zA-Z0-9]+}/connect", requireUserMw.ApplyFn(oauthsC.Connect))
+	r.HandleFunc("/oauth/{service:[a-zA-Z0-9]+}/callback", requireUserMw.ApplyFn(oauthsC.Callback))
+	r.HandleFunc("/oauth/{service:[a-zA-Z0-9]+}/test", requireUserMw.ApplyFn(oauthsC.DropboxTest))
 
 	// Assets
 	assetHandler := http.FileServer(http.Dir("./assets/"))
